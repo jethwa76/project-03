@@ -1,0 +1,9 @@
+{
+  "name": "project-3",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["apps/*"],
+  "scripts": {"dev":"concurrently \"npm run dev -w @project3/api\" \"npm run dev -w @project3/web\"", "build":"npm run build -w @project3/api && npm run build -w @project3/web", "test":"npm run test -w @project3/api", "lint":"npm run lint -w @project3/api && npm run lint -w @project3/web", "prepare":"husky"},
+  "devDependencies": {"concurrently":"^9.1.2", "husky":"^9.1.7", "lint-staged":"^15.5.0", "prettier":"^3.5.3"},
+  "lint-staged": {"*.{ts,tsx,json,md}": ["prettier --write"]}
+}

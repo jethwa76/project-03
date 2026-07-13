@@ -1,0 +1,3 @@
+import type {RequestHandler} from 'express'; import {Role} from '@prisma/client'; import {verifyAccess} from '../utils/tokens.js'; import {AppError} from '../utils/app-error.js';
+export const authenticate:RequestHandler=(req,_res,next)=>{try{const token=req.headers.authorization?.replace(/^Bearer\s+/,'');if(!token) throw new AppError(401,'Authentication required');req.user=verifyAccess(token);next();}catch{next(new AppError(401,'Invalid or expired access token'));}};
+export const authorize=(...roles:Role[]):RequestHandler=>(req,_res,next)=>!req.user?next(new AppError(401,'Authentication required')):roles.includes(req.user.role)?next():next(new AppError(403,'Insufficient permission'));

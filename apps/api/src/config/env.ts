@@ -1,0 +1,3 @@
+import 'dotenv/config'; import { z } from 'zod';
+const schema=z.object({NODE_ENV:z.enum(['development','test','production']).default('development'),PORT:z.coerce.number().default(4000),DATABASE_URL:z.string().url(),REDIS_URL:z.string().url(),JWT_ACCESS_SECRET:z.string().min(32),JWT_REFRESH_SECRET:z.string().min(32),CLIENT_URL:z.string().url(),EMAIL_FROM:z.string().email(),SMTP_HOST:z.string().optional(),SMTP_PORT:z.coerce.number().default(587),SMTP_USER:z.string().optional(),SMTP_PASS:z.string().optional(),CLOUDINARY_CLOUD_NAME:z.string().optional(),CLOUDINARY_API_KEY:z.string().optional(),CLOUDINARY_API_SECRET:z.string().optional()});
+export const env=schema.parse(process.env);

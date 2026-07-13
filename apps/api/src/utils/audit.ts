@@ -1,0 +1,1 @@
+import {prisma} from '../config/prisma.js'; export const audit=(userId:string,action:string,entityType:string,entityId?:string,metadata?:object,ipAddress?:string)=>prisma.activity.create({data:{userId,action,entityType,entityId,metadata,ipAddress}});

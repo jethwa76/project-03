@@ -1,0 +1,1 @@
+import type {RequestHandler} from 'express'; import {z} from 'zod'; export const validate=(schema:z.ZodTypeAny):RequestHandler=>(req,_res,next)=>{try{const parsed=schema.parse({body:req.body,query:req.query,params:req.params});req.body=parsed.body;req.query=parsed.query;next();}catch(e){next(e)}};
