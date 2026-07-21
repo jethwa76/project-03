@@ -1,52 +1,157 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
 
-enum Role { SUPER_ADMIN ADMIN MANAGER USER }
-enum UserStatus { PENDING ACTIVE REJECTED SUSPENDED }
-enum RecordStatus { DRAFT ACTIVE ARCHIVED }
-enum NotificationType { INFO SUCCESS WARNING ALERT }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+enum RecordStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ALERT
+}
 
 model User {
-  id String @id @default(cuid())
-  email String @unique
-  passwordHash String
-  firstName String
-  lastName String
-  role Role @default(USER)
-  status UserStatus @default(PENDING)
-  avatarUrl String?
+  id              String         @id @default(cuid())
+  email           String         @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  role            Role           @default(USER)
+  status          UserStatus     @default(PENDING)
+  avatarUrl       String?
   emailVerifiedAt DateTime?
-  lastLoginAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-  refreshTokens RefreshToken[]
-  records Record[] @relation("RecordOwner")
-  activities Activity[]
-  notifications Notification[]
-  files FileAsset[] @relation("UploadedBy")
+  lastLoginAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+  refreshTokens   RefreshToken[]
+  records         Record[]       @relation("RecordOwner")
+  activities      Activity[]
+  notifications   Notification[]
+  files              FileAsset[]         @relation("UploadedBy")
+  passwordResets     PasswordReset[]
+  emailVerifications EmailVerification[]
+
   @@index([role, status])
   @@index([deletedAt])
 }
-model RefreshToken { id String @id @default(cuid()); tokenHash String @unique; expiresAt DateTime; userId String; user User @relation(fields:[userId],references:[id],onDelete:Cascade); createdAt DateTime @default(now()); @@index([userId]) }
-model Record {
-  id String @id @default(cuid())
-  title String
-  reference String @unique
-  description String?
-  status RecordStatus @default(DRAFT)
-  dueDate DateTime?
-  ownerId String
-  owner User @relation("RecordOwner",fields:[ownerId],references:[id],onDelete:Restrict)
-  files FileAsset[]
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-  @@index([ownerId,status])
-  @@index([deletedAt,createdAt])
+
+  @@index([userId])
 }
-model FileAsset { id String @id @default(cuid()); url String; publicId String? @unique; name String; mimeType String; size Int; recordId String?; record Record? @relation(fields:[recordId],references:[id],onDelete:Cascade); uploadedById String; uploadedBy User @relation("UploadedBy",fields:[uploadedById],references:[id],onDelete:Restrict); createdAt DateTime @default(now()); @@index([recordId]) }
-model Notification { id String @id @default(cuid()); title String; message String; type NotificationType @default(INFO); readAt DateTime?; userId String; user User @relation(fields:[userId],references:[id],onDelete:Cascade); createdAt DateTime @default(now()); @@index([userId,readAt,createdAt]) }
-model Activity { id String @id @default(cuid()); action String; entityType String; entityId String?; metadata Json?; ipAddress String?; userId String; user User @relation(fields:[userId],references:[id],onDelete:Cascade); createdAt DateTime @default(now()); @@index([userId,createdAt]); @@index([entityType,entityId]) }
-model PasswordReset { id String @id @default(cuid()); tokenHash String @unique; expiresAt DateTime; usedAt DateTime?; userId String; user User @relation(fields:[userId],references:[id],onDelete:Cascade); createdAt DateTime @default(now()); @@index([userId]) }
-model EmailVerification { id String @id @default(cuid()); tokenHash String @unique; expiresAt DateTime; userId String; user User @relation(fields:[userId],references:[id],onDelete:Cascade); createdAt DateTime @default(now()); @@index([userId]) }
+
+model Record {
+  id          String       @id @default(cuid())
+  title       String
+  reference   String       @unique
+  description String?
+  status      RecordStatus @default(DRAFT)
+  dueDate     DateTime?
+  ownerId     String
+  owner       User         @relation("RecordOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  files       FileAsset[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@index([ownerId, status])
+  @@index([deletedAt, createdAt])
+}
+
+model FileAsset {
+  id           String   @id @default(cuid())
+  url          String
+  publicId     String?  @unique
+  name         String
+  mimeType     String
+  size         Int
+  recordId     String?
+  record       Record?  @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedBy   User     @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now())
+
+  @@index([recordId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  readAt    DateTime?
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model Activity {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

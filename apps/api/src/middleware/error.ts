@@ -1,3 +1,3 @@
-import type {ErrorRequestHandler} from 'express'; import {ZodError} from 'zod'; import {AppError} from '../utils/app-error.js';
-export const notFound:ErrorRequestHandler=(req,_res,next)=>next(new AppError(404,`Route ${req.method} ${req.path} not found`));
-export const errorHandler:ErrorRequestHandler=(err,req,res,_next)=>{const status=err instanceof ZodError?422:err instanceof AppError?err.statusCode:500; res.status(status).json({success:false,message:err instanceof ZodError?'Validation failed':err.message||'Internal server error',details:err instanceof ZodError?err.flatten():err.details,requestId:req.requestId});};
+import type {RequestHandler, ErrorRequestHandler} from 'express'; import {ZodError} from 'zod'; import {AppError} from '../utils/app-error.js';
+export const notFound:RequestHandler=(req,_res,next)=>next(new AppError(404,`Route ${req.method} ${req.path} not found`));
+export const errorHandler:ErrorRequestHandler=(err,req,res,_next)=>{const status=err instanceof ZodError?422:err instanceof AppError?err.statusCode:500; (res as any).status(status).json({success:false,message:err instanceof ZodError?'Validation failed':err.message||'Internal server error',details:err instanceof ZodError?err.flatten():err.details,requestId:req.requestId});};
